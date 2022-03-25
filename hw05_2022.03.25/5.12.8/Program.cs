@@ -33,34 +33,28 @@ namespace _5._12._8
 
         static void CalcScore(int i, int j, string s1, string s2)
         {
-            int s2_gap_score = score[i - 1, j] +
-                (i > 1 && score[i - 2, j] + data.gap == score[i - 1, j] ? 
-                data.double_gap : data.gap);
-            int s1_gap_score = score[i, j - 1] +
-                (j > 1 && score[i, j - 2] + data.gap == score[i, j - 1] ?
-                data.double_gap : data.gap);
-            int no_gap_score = score[i - 1, j - 1] + (s1[i - 1] == s2[j - 1] ? 
+            score[i, j] = score[i - 1, j - 1] + (s1[i - 1] == s2[j - 1] ?
                 data.good : data.bad);
-
-            //Console.WriteLine($"{s2_gap_score} {s1_gap_score} {no_gap_score}");
-            if (s1_gap_score >= s2_gap_score && s1_gap_score >= no_gap_score)
+            prev[i, j] = 0;
+            for (int k = 0; k < i; k++)
             {
-                score[i, j] = s1_gap_score;
-                prev[i, j] = 1;
-                //Console.WriteLine($"{score[i, j]} {data.s1[..i]} {data.s2[..j]}");
-                return;
+                int s2_gaps_score = score[k, j] + data.gap + (i - k - 1) * data.double_gap;
+                if (s2_gaps_score > score[i, j])
+                {
+                    score[i, j] = s2_gaps_score;
+                    prev[i, j] = i - k;
+                }
             }
 
-            if (s2_gap_score >= s1_gap_score && s2_gap_score >= no_gap_score)
+            for (int k = 0; k < j; k++)
             {
-                score[i, j] = s2_gap_score;
-                prev[i, j] = 2;
-                //Console.WriteLine($"{score[i, j]} {data.s1[..i]} {data.s2[..j]}"); 
-                return;
+                int s1_gaps_score = score[i, k] + data.gap + (j - k - 1) * data.double_gap;
+                if (s1_gaps_score > score[i, j])
+                {
+                    score[i, j] = s1_gaps_score;
+                    prev[i, j] = -(j - k);
+                }
             }
-            score[i, j] = no_gap_score;
-            prev[i, j] = 3;
-            //Console.WriteLine($"{score[i, j]} {data.s1[..i]} {data.s2[..j]}");
         }
 
         static int GAP(string s1, string s2)
@@ -69,9 +63,15 @@ namespace _5._12._8
             prev = new int[s1.Length + 1, s2.Length + 1];
             score[0, 0] = 0;
             for (int i = 1; i <= s1.Length; i++)
+            {
+                prev[i, 0] = i;
                 score[i, 0] = data.gap + (i - 1) * data.double_gap;
+            }
             for (int i = 1; i <= s2.Length; i++)
+            {
+                prev[0, i] = -i;
                 score[0, i] = data.gap + (i - 1) * data.double_gap;
+            }
             for (int i = 1; i <= s1.Length; i++)
             {
                 for (int j = 1; j <= s2.Length; j++)
@@ -90,17 +90,23 @@ namespace _5._12._8
             StringBuilder ans1 = new(), ans2 = new();
             while (i + j > 0)
             {
-                if (prev[i, j] == 2)
+                if (prev[i, j] > 0)
                 {
-                    ans1.Append(s1[i - 1]);
-                    ans2.Append('-');
-                    i--;
+                    for (int k = 0; k < prev[i, j]; k++)
+                    {
+                        ans1.Append(s1[i - k - 1]);
+                        ans2.Append('-');
+                    }
+                    i -= prev[i, j];
                 }
-                else if (prev[i, j] == 1)
+                else if (prev[i, j] < 0)
                 {
-                    ans1.Append('-');
-                    ans2.Append(s2[j - 1]);
-                    j--;
+                    for (int k = 0; k < -prev[i, j]; k++)
+                    {
+                        ans1.Append('-');
+                        ans2.Append(s2[j - k - 1]);
+                    }
+                    j += prev[i, j];
                 }
                 else
                 {
