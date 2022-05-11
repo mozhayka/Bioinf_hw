@@ -64,7 +64,7 @@ namespace _3
             int seed = (int)DateTime.Now.Ticks;
             Random rand = new(seed);
 
-            List<Point> centers = new() { points[rand.Next(k)] };
+            List<Point> centers = new() { points[rand.Next(points.Count)] };
             for (int i = 1; i < k; i++)
             {
                 centers.Add(RandomPoint(points, centers));
