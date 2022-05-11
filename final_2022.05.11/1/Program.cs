@@ -7,7 +7,7 @@ namespace _1
     {
         static void Main(string[] args)
         {
-            Input input = new("dataset.txt");
+            Input input = new("dataset2.txt");
             Permutation perm = new(input.permutation, input.permutation2);
             var sorted = perm.GreedySort();
 
